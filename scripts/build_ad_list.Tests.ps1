@@ -75,6 +75,25 @@ Describe 'build_ad_list.ps1' {
         }
     }
 
+    Context 'Action field stripping' {
+        It 'strips Reject/REJECT/DIRECT/PROXY from 3-field rules' {
+            $in  = Join-Path $script:TempDir 'in.txt'
+            $out = Join-Path $script:TempDir 'out.txt'
+            @(
+                'DOMAIN-SUFFIX,ad.example.com,Reject'
+                'DOMAIN-SUFFIX,bad.com,REJECT'
+                'DOMAIN-SUFFIX,ok.com,DIRECT'
+                'DOMAIN-SUFFIX,go.com,PROXY'
+            ) | Set-Content -Path $in -Encoding utf8NoBOM
+            Invoke-BuildAdList -InputPath $in -OutputPath $out
+            $rules = Get-Content $out | Where-Object { $_ -notmatch '^\s*#' }
+            $rules | Should -HaveCount 4
+            foreach ($r in $rules) {
+                ($r.Split(',').Count) | Should -Be 2
+            }
+        }
+    }
+
     Context 'IP-CIDR filtering' {
         It 'drops IP-CIDR rules' {
             $in  = Join-Path $script:TempDir 'in.txt'

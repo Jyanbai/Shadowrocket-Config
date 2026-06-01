@@ -64,6 +64,12 @@ function Invoke-BuildAdList {
         if ($norm.StartsWith('#'))                     { continue }   # safety after normalization
         if (Test-IsDgaDomain $norm)                    { continue }
         if ($norm -match '^IP-CIDR')                   { continue }   # drop IP-CIDR: triggers unnecessary DNS in rule mode
+        # Strip action field: DOMAIN-SUFFIX,foo.com,Reject → DOMAIN-SUFFIX,foo.com
+        # Shadowrocket RULE-SET expects 2 fields (type,value); action comes from the conf line.
+        $parts = $norm.Split(',')
+        if ($parts.Count -ge 3 -and $parts[2] -match '^(Reject|REJECT|DIRECT|PROXY|XYPROXY)$') {
+            $norm = ($parts[0..1] -join ',')
+        }
         if (-not $seen.Add($norm))                     { continue }   # dedup
         $kept.Add($norm) | Out-Null
     }

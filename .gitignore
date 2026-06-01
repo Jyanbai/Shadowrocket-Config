@@ -1,0 +1,13 @@
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# Editor backup
+*~
+*.swp
+*.swo
+
+# PowerShell
+*.ps1xml

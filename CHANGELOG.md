@@ -4,6 +4,20 @@ All notable changes to this repo are documented here. The format follows [Keep a
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-06-01
+
+### Fixed
+- DNS leak: changed `dns-server` from `system` → `223.5.5.5,119.29.29.29` (Alidns + TencentDNS IP); previous DoH format was silently ignored by Shadowrocket.
+- DNS leak: removed `ChinaCompanyIp.list` and `ChinaIp.list` RULE-SETs (IP-CIDR rules force local DNS resolution in rule mode, causing leaks).
+- DNS leak: removed all 128 IP-CIDR rules from `ad_list.txt` (same reason; pure DOMAIN-SUFFIX list avoids unnecessary DNS lookups).
+
+### Smoke test - 2026-06-01
+- iOS Shadowrocket subscription: OK
+- Domestic sites (zhihu, baidu): DIRECT, fast
+- International sites (google): PROXY, works
+- Ad blocking: verified via ad.12306.cn and ad.doubleclick.net (REJECT)
+- DNS leak: dnsleaktest.com shows no ISP DNS servers leaking
+
 ## [0.1.0] - 2026-06-01
 
 ### Added

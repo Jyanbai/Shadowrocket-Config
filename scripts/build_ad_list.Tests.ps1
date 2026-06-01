@@ -75,6 +75,23 @@ Describe 'build_ad_list.ps1' {
         }
     }
 
+    Context 'IP-CIDR filtering' {
+        It 'drops IP-CIDR rules' {
+            $in  = Join-Path $script:TempDir 'in.txt'
+            $out = Join-Path $script:TempDir 'out.txt'
+            @(
+                'DOMAIN-SUFFIX,ad.example.com,Reject'
+                'IP-CIDR,192.168.1.0/24,Reject'
+                'IP-CIDR,10.0.0.0/8,Reject'
+                'DOMAIN-SUFFIX,tracker.example.net,Reject'
+            ) | Set-Content -Path $in -Encoding utf8NoBOM
+            Invoke-BuildAdList -InputPath $in -OutputPath $out
+            $rules = Get-Content $out | Where-Object { $_ -notmatch '^\s*#' }
+            $rules | Should -HaveCount 2
+            $rules | Where-Object { $_ -match 'IP-CIDR' } | Should -BeNullOrEmpty
+        }
+    }
+
     Context 'Input filtering' {
         It 'skips empty, comment, and section header lines' {
             $in  = Join-Path $script:TempDir 'in.txt'

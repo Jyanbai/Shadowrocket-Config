@@ -17,7 +17,7 @@ $CheapTlds = @('online','site','space','store','website','rest','top','xyz','cli
 
 function Test-IsDgaDomain {
     param([Parameter(Mandatory)][string]$Rule)
-    # Only filter DOMAIN-SUFFIX rules; IP-CIDR is left alone (design §7).
+    # Only filter DOMAIN-SUFFIX rules; IP-CIDR and other types are dropped entirely elsewhere.
     if ($Rule -notmatch '^DOMAIN-SUFFIX,') { return $false }
     $parts = $Rule.Split(',')
     if ($parts.Count -lt 2) { return $false }
@@ -63,6 +63,7 @@ function Invoke-BuildAdList {
         $norm = ($trim -split '\s*,\s*') -join ','
         if ($norm.StartsWith('#'))                     { continue }   # safety after normalization
         if (Test-IsDgaDomain $norm)                    { continue }
+        if ($norm -match '^IP-CIDR')                   { continue }   # drop IP-CIDR: triggers unnecessary DNS in rule mode
         if (-not $seen.Add($norm))                     { continue }   # dedup
         $kept.Add($norm) | Out-Null
     }
